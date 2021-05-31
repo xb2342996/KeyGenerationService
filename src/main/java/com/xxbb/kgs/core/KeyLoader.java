@@ -1,6 +1,7 @@
 package com.xxbb.kgs.core;
 
 import com.xxbb.kgs.exception.RedisKeyException;
+import com.xxbb.kgs.repository.KeyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,8 @@ public class KeyLoader {
     private static final Logger logger = LoggerFactory.getLogger(KeyLoader.class);
     private final ReactiveRedisConnectionFactory factory;
     private final KeyGenerator generator;
-    private final static String UNUSEDKEY = "unusedKey";
     @Autowired
-    private ReactiveRedisTemplate<String, Object> reactiveRedisTemplate;
+    private KeyRepository keyRepository;
 
     public KeyLoader(KeyGenerator generator, ReactiveRedisConnectionFactory factory) {
         this.generator = generator;
@@ -41,7 +41,7 @@ public class KeyLoader {
                 .subscribeOn(Schedulers.elastic())
                 .flatMapMany(s -> generator.generateKeys())
                 .publishOn(Schedulers.parallel())
-                .transform(this::saveUnusedKeys)
+                .transform(keyRepository::saveUnusedKeys)
                 .subscribeOn(Schedulers.parallel())
                 .doOnSubscribe(subscription -> times[0] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
                 .doOnComplete(() -> times[1] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
@@ -51,20 +51,4 @@ public class KeyLoader {
                         () -> logger.info(String.format("key reset completed in: %d seconds", (times[1] - times[0]))));
     }
 
-    private Mono<Void> saveUnusedKeys(Flux<Key> keys) {
-        AtomicLong counter = new AtomicLong(0);
-        return keys.buffer(100)
-                .flatMap(keyList ->
-                        reactiveRedisTemplate
-                                .opsForSet()
-                                .add(UNUSEDKEY, keyList.toArray(new Key[0]))
-                                .subscribeOn(Schedulers.parallel()))
-                .publishOn(Schedulers.parallel())
-                .filter(aLong -> aLong > 0)
-                .switchIfEmpty(Mono.error(new RedisKeyException()))
-                .buffer(10000)
-                .map(longs -> longs.stream().mapToLong(Long::longValue).sum())
-                .doOnNext(processedElements -> logger.info("Processed {} elements", counter.addAndGet(processedElements)))
-                .then();
-    }
 }
