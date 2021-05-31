@@ -21,10 +21,10 @@ public class KeyGenerator {
         this.length = length;
     }
 
-    private Flux<Key> generateKeys() {
+    public Flux<Key> generateKeys() {
         return Flux.merge(
                 Flux.range(0, length)
-                        .reduce(Flux.just(""), (keyFlux, i) -> keyFlux.compose(this::addCharacter)))
+                        .reduce(Flux.just(""), (keyFlux, i) -> keyFlux.transform(this::addCharacter)))
                 .map(Key::new)
                 .doOnSubscribe(subscription -> logger.info(
                         "Starting the generation of {} keys",
@@ -50,11 +50,5 @@ public class KeyGenerator {
     public static void main(String[] args) {
         Base64Dictionary b64d = new Base64Dictionary();
         KeyGenerator kg = new KeyGenerator(b64d, 6);
-        Flux.merge(
-                Flux.range(0, 6)
-                    .reduce(Flux.just(""), (keyFlux, i) -> keyFlux.compose(kg::addCharacter)))
-            .map(Key::new)
-            .toStream()
-            .forEach(System.out::println);
     }
 }
