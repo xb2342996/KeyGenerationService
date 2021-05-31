@@ -1,0 +1,74 @@
+version: '3'
+services:
+#  master:
+#    image: redis
+#    container_name: kgs-master
+#    restart: always
+#    ports:
+#    - 6379:6379
+#    environment:
+#      TZ: "Asia/Shanghai"
+#    volumes:
+#    - D:\docker\redis\kgs-master\conf\redis.conf:/usr/local/etc/redis/redis.conf
+#    - D:\docker\redis\kgs-master\data:/usr/local/etc/data
+#    command: redis-server /usr/local/etc/redis/redis.conf
+#  slave1:
+#    image: redis
+#    container_name: kgs-slave1
+#    restart: always
+#    ports:
+#    - 6380:6379
+#    depends_on:
+#      - master
+#    environment:
+#      TZ: "Asia/Shanghai"
+#    volumes:
+#    - D:\docker\redis\kgs-slave1\conf\redis.conf:/usr/local/etc/redis/redis.conf
+#    - D:\docker\redis\kgs-slave1\data:/usr/local/etc/data
+#    command: redis-server /usr/local/etc/redis/redis.conf
+#  slave2:
+#    image: redis
+#    container_name: kgs-slave2
+#    ports:
+#      - 6381:6379
+#    depends_on:
+#      - master
+#    environment:
+#      TZ: "Asia/Shanghai"
+#    volumes:
+#      - D:\docker\redis\kgs-slave2\conf\redis.conf:/usr/local/etc/redis/redis.conf
+#      - D:\docker\redis\kgs-slave2\data:/usr/local/etc/data
+#    command: redis-server /usr/local/etc/redis/redis.conf
+  sentinel1:
+    image: redis
+    container_name: kgs-sentinel1
+    restart: always
+    ports:
+    - 26379:26379
+    environment:
+      TZ: "Asia/Shanghai"
+    volumes:
+    - D:\docker\redis\kgs-sentinel\sentinel1.conf:/usr/local/etc/redis/sentinel.conf
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+  sentinel2:
+    image: redis
+    container_name: kgs-sentinel2
+    restart: always
+    ports:
+      - 26380:26379
+    environment:
+      TZ: "Asia/Shanghai"
+    volumes:
+      - D:\docker\redis\kgs-sentinel\sentinel2.conf:/usr/local/etc/redis/sentinel.conf
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+  sentinel3:
+    image: redis
+    container_name: kgs-sentinel3
+    restart: always
+    ports:
+      - 26381:26379
+    environment:
+      TZ: "Asia/Shanghai"
+    volumes:
+      - D:\docker\redis\kgs-sentinel\sentinel3.conf:/usr/local/etc/redis/sentinel.conf
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
