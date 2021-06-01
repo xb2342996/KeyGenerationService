@@ -1,54 +1,54 @@
 version: '3'
 services:
-#  master:
-#    image: redis
-#    container_name: kgs-master
-#    restart: always
-#    ports:
-#    - 6379:6379
-#    environment:
-#      TZ: "Asia/Shanghai"
-#    volumes:
-#    - D:\docker\redis\kgs-master\conf\redis.conf:/usr/local/etc/redis/redis.conf
-#    - D:\docker\redis\kgs-master\data:/usr/local/etc/data
-#    command: redis-server /usr/local/etc/redis/redis.conf
-#  slave1:
-#    image: redis
-#    container_name: kgs-slave1
-#    restart: always
-#    ports:
-#    - 6380:6379
-#    depends_on:
-#      - master
-#    environment:
-#      TZ: "Asia/Shanghai"
-#    volumes:
-#    - D:\docker\redis\kgs-slave1\conf\redis.conf:/usr/local/etc/redis/redis.conf
-#    - D:\docker\redis\kgs-slave1\data:/usr/local/etc/data
-#    command: redis-server /usr/local/etc/redis/redis.conf
-#  slave2:
-#    image: redis
-#    container_name: kgs-slave2
-#    ports:
-#      - 6381:6379
-#    depends_on:
-#      - master
-#    environment:
-#      TZ: "Asia/Shanghai"
-#    volumes:
-#      - D:\docker\redis\kgs-slave2\conf\redis.conf:/usr/local/etc/redis/redis.conf
-#      - D:\docker\redis\kgs-slave2\data:/usr/local/etc/data
-#    command: redis-server /usr/local/etc/redis/redis.conf
+  master:
+    image: redis
+    container_name: kgs-master
+    privileged: true
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6379:6379
+    volumes:
+      - /home/xiongbiao/docker/redis/redis-master.conf:/usr/local/etc/redis/redis.conf
+      - /home/xiongbiao/docker/redis/kgs-master/data:/data
+  slave1:
+    image: redis
+    container_name: kgs-slave1
+    privileged: true
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    command: redis-server /usr/local/etc/redis/redis.conf --slaveof 172.16.68.4 6379
+    ports:
+      - 6380:6379
+    volumes:
+      - /home/xiongbiao/docker/redis/redis-slave1.conf:/usr/local/etc/redis/redis.conf
+      - /home/xiongbiao/docker/redis/kgs-slave1/data:/data
+  slave2:
+    image: redis
+    container_name: kgs-slave2
+    privileged: true
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    command: redis-server /usr/local/etc/redis/redis.conf --slaveof 172.16.68.4 6379
+    ports:
+      - 6381:6379
+    volumes:
+      - /home/xiongbiao/docker/redis/redis-slave2.conf:/usr/local/etc/redis/redis.conf
+      - /home/xiongbiao/docker/redis/kgs-slave2/data:/data
   sentinel1:
     image: redis
     container_name: kgs-sentinel1
     restart: always
     ports:
-    - 26379:26379
+      - 26379:26379
     environment:
       TZ: "Asia/Shanghai"
     volumes:
-    - D:\docker\redis\kgs-sentinel\sentinel1.conf:/usr/local/etc/redis/sentinel.conf
+      - /home/xiongbiao/docker/redis/sentinel1.conf:/usr/local/etc/redis/sentinel.conf
     command: redis-sentinel /usr/local/etc/redis/sentinel.conf
   sentinel2:
     image: redis
@@ -56,11 +56,11 @@ services:
     restart: always
     ports:
       - 26380:26379
-    environment:
-      TZ: "Asia/Shanghai"
-    volumes:
-      - D:\docker\redis\kgs-sentinel\sentinel2.conf:/usr/local/etc/redis/sentinel.conf
-    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+      environment:
+        TZ: "Asia/Shanghai"
+      volumes:
+        - /home/xiongbiao/docker/redis/sentinel2.conf:/usr/local/etc/redis/sentinel.conf
+      command: redis-sentinel /usr/local/etc/redis/sentinel.conf
   sentinel3:
     image: redis
     container_name: kgs-sentinel3
@@ -70,5 +70,5 @@ services:
     environment:
       TZ: "Asia/Shanghai"
     volumes:
-      - D:\docker\redis\kgs-sentinel\sentinel3.conf:/usr/local/etc/redis/sentinel.conf
+      - /home/xiongbiao/docker/redis/sentinel3.conf:/usr/local/etc/redis/sentinel.conf
     command: redis-sentinel /usr/local/etc/redis/sentinel.conf
