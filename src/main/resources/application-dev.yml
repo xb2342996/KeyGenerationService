@@ -3,6 +3,7 @@ server:
 
 spring:
   redis:
-    host: 172.16.68.4
-    port: 6379
+    sentinel:
+      nodes: 172.16.68.4:26379,172.16.68.4:26380,172.16.68.4:26381
+      master: mymaster
     password: 123456

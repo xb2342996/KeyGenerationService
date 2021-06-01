@@ -1,5 +1,7 @@
 package com.xxbb.kgs.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xxbb.kgs.core.Key;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -10,6 +12,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -18,13 +21,10 @@ public class RedisConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(name = "reactiveRedisTemplate")
-    public ReactiveRedisTemplate<String, Object> reactiveRedisTemplate(ReactiveRedisConnectionFactory reactiveRedisConnectionFactory) {
-        RedisSerializationContext<String, Object> serializationContext = RedisSerializationContext.<String, Object>
-                newSerializationContext()
-                .key(new StringRedisSerializer())
-                .value(new GenericJackson2JsonRedisSerializer())
-                .hashKey(new StringRedisSerializer())
-                .hashValue(new GenericJackson2JsonRedisSerializer())
+    public ReactiveRedisTemplate<String, String> reactiveRedisTemplate(ReactiveRedisConnectionFactory reactiveRedisConnectionFactory) {
+        RedisSerializationContext<String, String> serializationContext = RedisSerializationContext.<String, String>
+                newSerializationContext(new StringRedisSerializer())
+                .value(new StringRedisSerializer())
                 .build();
         return new ReactiveRedisTemplate<>(reactiveRedisConnectionFactory, serializationContext);
     }

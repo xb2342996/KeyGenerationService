@@ -1,12 +1,13 @@
 package com.xxbb.kgs.repository;
 
-import com.xxbb.kgs.core.Key;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Service
 public interface KeyRepository {
-    Mono<Void> saveUnusedKeys(Flux<Key> keys);
-    Flux<Key> getUnusedKeys(long count);
+    Mono<Void> saveUnusedKeys(Flux<String> keys);
+    List<String> getUnusedKeys(long count);
 }

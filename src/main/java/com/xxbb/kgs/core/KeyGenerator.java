@@ -14,21 +14,24 @@ import java.util.List;
 public class KeyGenerator {
     private static final Logger logger = LoggerFactory.getLogger(KeyGenerator.class);
     private final Base64Dictionary base64Dictionary;
-    private final int length;
+    private final KeyProperties keyProperties;
 
-    public KeyGenerator(Base64Dictionary base64Dictionary, int length) {
+    public KeyGenerator(Base64Dictionary base64Dictionary, KeyProperties properties) {
         this.base64Dictionary = base64Dictionary;
-        this.length = length;
+        this.keyProperties = properties;
     }
 
-    public Flux<Key> generateKeys() {
+    public KeyProperties getKeyProperties() {
+        return keyProperties;
+    }
+
+    public Flux<String> generateKeys() {
         return Flux.merge(
-                Flux.range(0, length)
+                Flux.range(0, keyProperties.length())
                         .reduce(Flux.just(""), (keyFlux, i) -> keyFlux.transform(this::addCharacter)))
-                .map(Key::new)
                 .doOnSubscribe(subscription -> logger.info(
                         "Starting the generation of {} keys",
-                        BigDecimal.valueOf(Math.pow(64, length)).toBigInteger()
+                        BigDecimal.valueOf(Math.pow(64, keyProperties.length())).toBigInteger()
                 ))
                 .subscribeOn(Schedulers.parallel());
     }
@@ -47,8 +50,4 @@ public class KeyGenerator {
         return dict;
     }
 
-    public static void main(String[] args) {
-        Base64Dictionary b64d = new Base64Dictionary();
-        KeyGenerator kg = new KeyGenerator(b64d, 6);
-    }
 }

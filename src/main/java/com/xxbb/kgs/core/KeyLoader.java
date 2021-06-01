@@ -34,21 +34,23 @@ public class KeyLoader {
 
     @PostConstruct
     public void loadKeys() {
-        final Long[] times = new Long[2];
-        factory.getReactiveConnection()
-                .serverCommands()
-                .flushAll()
-                .subscribeOn(Schedulers.elastic())
-                .flatMapMany(s -> generator.generateKeys())
-                .publishOn(Schedulers.parallel())
-                .transform(keyRepository::saveUnusedKeys)
-                .subscribeOn(Schedulers.parallel())
-                .doOnSubscribe(subscription -> times[0] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
-                .doOnComplete(() -> times[1] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
-                .subscribe(
-                        it -> logger.trace("Batch Processed"),
-                        ex -> logger.error(ex.getLocalizedMessage(), ex),
-                        () -> logger.info(String.format("key reset completed in: %d seconds", (times[1] - times[0]))));
+        if (generator.getKeyProperties().isLoad()) {
+            final Long[] times = new Long[2];
+            factory.getReactiveConnection()
+                    .serverCommands()
+                    .flushAll()
+                    .subscribeOn(Schedulers.elastic())
+                    .flatMapMany(s -> generator.generateKeys())
+                    .publishOn(Schedulers.parallel())
+                    .transform(keyRepository::saveUnusedKeys)
+                    .subscribeOn(Schedulers.parallel())
+                    .doOnSubscribe(subscription -> times[0] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
+                    .doOnComplete(() -> times[1] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
+                    .subscribe(
+                            it -> logger.trace("Batch Processed"),
+                            ex -> logger.error(ex.getLocalizedMessage(), ex),
+                            () -> logger.info(String.format("key reset completed in: %d seconds", (times[1] - times[0]))));
+        }
     }
 
 }
