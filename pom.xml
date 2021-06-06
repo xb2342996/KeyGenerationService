@@ -7,7 +7,7 @@
     <groupId>com.xxbb</groupId>
     <artifactId>KeyGenerationService</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -17,6 +17,7 @@
         <lombok.version>1.18.6</lombok.version>
         <slf4j.version>1.7.30</slf4j.version>
         <reactor.version>3.3.10.RELEASE</reactor.version>
+        <docker.image.prefix>base</docker.image.prefix>
     </properties>
 
     <parent>
@@ -60,6 +61,7 @@
     </dependencies>
 
     <build>
+        <finalName>KeyGeneration</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -75,6 +77,22 @@
                             <version>${lombok.version}</version>
                         </path>
                     </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <configuration>
+                    <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <dockerDirectory>${basedir}</dockerDirectory>
+                    <resources>
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <dictionary>${project.build.directory}</dictionary>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
                 </configuration>
             </plugin>
         </plugins>
