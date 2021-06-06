@@ -85,11 +85,11 @@
                 <version>1.0.0</version>
                 <configuration>
                     <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
-                    <dockerDirectory>build</dockerDirectory>
+                    <dockerDirectory>.</dockerDirectory>
                     <resources>
                         <resource>
                             <targetPath>/</targetPath>
-                            <dictionary>${project.build.directory}</dictionary>
+                            <directory>${project.build.directory}</directory>
                             <include>${project.build.finalName}.jar</include>
                         </resource>
                     </resources>
