@@ -5,4 +5,4 @@ spring:
 kgs:
   keys:
     length: 3
-    load: true
+    load: false
