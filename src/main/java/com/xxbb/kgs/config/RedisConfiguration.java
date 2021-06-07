@@ -29,7 +29,8 @@ public class RedisConfiguration {
         return new ReactiveRedisTemplate<>(reactiveRedisConnectionFactory, serializationContext);
     }
 
-    @Bean(name = "redisTemplate")
+    @Bean
+    @ConditionalOnMissingBean(name = "redisTemplate")
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
