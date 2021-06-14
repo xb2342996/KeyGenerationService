@@ -1,31 +1,36 @@
 package com.xxbb.kgs.core;
 
-import com.xxbb.kgs.exception.RedisKeyException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xxbb.kgs.repository.KeyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisStringCommands;
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
+import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.xxbb.kgs.common.Constants.UNUSEDKEY;
 
 @Component
 public class KeyLoader {
     private static final Logger logger = LoggerFactory.getLogger(KeyLoader.class);
+    private static final String LOADED_LOCK = "kgs:isLoad";
+    private static final Boolean FLAG = true;
     private final ReactiveRedisConnectionFactory factory;
     private final KeyGenerator generator;
     @Autowired
     private KeyRepository keyRepository;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     public KeyLoader(KeyGenerator generator, ReactiveRedisConnectionFactory factory) {
         this.generator = generator;
@@ -34,11 +39,11 @@ public class KeyLoader {
 
     @PostConstruct
     public void loadKeys() {
-        if (generator.getKeyProperties().isLoad()) {
+        if (getLock()) {
             final Long[] times = new Long[2];
             factory.getReactiveConnection()
-                    .serverCommands()
-                    .flushAll()
+                    .keyCommands()
+                    .del(ByteBuffer.wrap(UNUSEDKEY.getBytes()))
                     .subscribeOn(Schedulers.elastic())
                     .flatMapMany(s -> generator.generateKeys())
                     .publishOn(Schedulers.parallel())
@@ -53,4 +58,12 @@ public class KeyLoader {
         }
     }
 
+    private boolean getLock() {
+        Object lock = redisTemplate.opsForValue().get(LOADED_LOCK);
+        if (lock == null) {
+            redisTemplate.opsForValue().set(LOADED_LOCK, FLAG);
+            return true;
+        }
+        return false;
+    }
 }

@@ -1,5 +1,6 @@
 package com.xxbb.kgs.repository;
 
+import com.xxbb.kgs.common.Constants;
 import com.xxbb.kgs.core.Key;
 import com.xxbb.kgs.exception.Assert;
 import com.xxbb.kgs.exception.RedisKeyException;
@@ -17,12 +18,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import static com.xxbb.kgs.common.Constants.UNUSEDKEY;
+import static com.xxbb.kgs.common.Constants.USEDKEY;
+
 @Service("keyRepository")
 public class KeyRedisRepository implements KeyRepository{
 
     private final Logger logger = LoggerFactory.getLogger(KeyRepository.class);
-    private final static String UNUSEDKEY = "unusedKey";
-    private final static String USEDKEY = "usedKey";
     @Autowired
     private ReactiveRedisTemplate<String, String> reactiveRedisTemplate;
 
