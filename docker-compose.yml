@@ -1,74 +1,20 @@
 version: '3'
 services:
   master:
-    image: redis
-    container_name: kgs-master
+    image: base/key-generation-service
+    container_name: key-generation-service-master
     privileged: true
     restart: always
     environment:
       - TZ=Asia/Shanghai
-    command: redis-server /usr/local/etc/redis/redis.conf
     ports:
-      - 6379:6379
-    volumes:
-      - /home/xiongbiao/docker/redis/redis-master.conf:/usr/local/etc/redis/redis.conf
-      - /home/xiongbiao/docker/redis/kgs-master/data:/data
-  slave1:
-    image: redis
-    container_name: kgs-slave1
+      - 10000:8080
+  backup:
+    image: base/key-generation-service
+    container_name: key-generation-service-backup
     privileged: true
     restart: always
     environment:
       - TZ=Asia/Shanghai
-    command: redis-server /usr/local/etc/redis/redis.conf --slaveof 192.168.119.128 6379
     ports:
-      - 6380:6379
-    volumes:
-      - /home/xiongbiao/docker/redis/redis-slave1.conf:/usr/local/etc/redis/redis.conf
-      - /home/xiongbiao/docker/redis/kgs-slave1/data:/data
-  slave2:
-    image: redis
-    container_name: kgs-slave2
-    privileged: true
-    restart: always
-    environment:
-      - TZ=Asia/Shanghai
-    command: redis-server /usr/local/etc/redis/redis.conf --slaveof 192.168.119.128 6379
-    ports:
-      - 6381:6379
-    volumes:
-      - /home/xiongbiao/docker/redis/redis-slave2.conf:/usr/local/etc/redis/redis.conf
-      - /home/xiongbiao/docker/redis/kgs-slave2/data:/data
-  sentinel1:
-    image: redis
-    container_name: kgs-sentinel1
-    restart: always
-    ports:
-      - 26379:26379
-    environment:
-      TZ: "Asia/Shanghai"
-    volumes:
-      - /home/xiongbiao/docker/redis/sentinel1.conf:/usr/local/etc/redis/sentinel.conf
-    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
-  sentinel2:
-    image: redis
-    container_name: kgs-sentinel2
-    restart: always
-    ports:
-      - 26380:26379
-      environment:
-        TZ: "Asia/Shanghai"
-      volumes:
-        - /home/xiongbiao/docker/redis/sentinel2.conf:/usr/local/etc/redis/sentinel.conf
-      command: redis-sentinel /usr/local/etc/redis/sentinel.conf
-  sentinel3:
-    image: redis
-    container_name: kgs-sentinel3
-    restart: always
-    ports:
-      - 26381:26379
-    environment:
-      TZ: "Asia/Shanghai"
-    volumes:
-      - /home/xiongbiao/docker/redis/sentinel3.conf:/usr/local/etc/redis/sentinel.conf
-    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+      - 10001:8080
