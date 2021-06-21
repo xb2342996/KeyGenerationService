@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class KeyExceptionHandler {
 
     @ExceptionHandler(RedisKeyException.class)
-    public R<String> keyException(RedisKeyException e) {
+    public R<Void> keyException(RedisKeyException e) {
         return R.failure(e.getMsg());
     }
 }
