@@ -18,8 +18,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import static com.xxbb.kgs.common.Constants.UNUSEDKEY;
-import static com.xxbb.kgs.common.Constants.USEDKEY;
+import static com.xxbb.kgs.common.Constants.*;
 
 @Service("keyRepository")
 public class KeyRedisRepository implements KeyRepository{
@@ -49,6 +48,11 @@ public class KeyRedisRepository implements KeyRepository{
     @Override
     public List<String> getUnusedKeys(long count) {
         Assert.isTrue(count >= 0, "Number of Keys cannot be negative, Please retry...");
+        Assert.isTrue(count < (64 ^ 6), "Number of Keys cannot over the limit, Please retry...");
+
+        if (count > DEFAULT_KEY_MAX_COUNT) {
+            count = DEFAULT_KEY_MAX_COUNT;
+        }
         return Mono.justOrEmpty(count).flatMapMany(this::popKeys).toStream().collect(Collectors.toList());
     }
 
